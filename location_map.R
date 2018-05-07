@@ -61,8 +61,8 @@ brand_df <- data.table(name = name, count = as.numeric(count), ArticleID = Brand
 ######################## 處理正負面的評語 ##############################
 
 #載入正負面的評語
-neg<- readLines("MDS讀書會05-實作(5)：文字資料視覺化_字典_negative words.txt", encoding = "UTF-8")
-pos <- readLines("MDS讀書會05-實作(5)：文字資料視覺化_字典_positive words.txt", encoding = "UTF-8")
+neg<- readLines("negative words.txt", encoding = "UTF-8")
+pos <- readLines("positive words.txt", encoding = "UTF-8")
 
 #對正負面給予權重
 weight <- rep(-1, length(neg))
