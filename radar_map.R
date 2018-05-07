@@ -84,7 +84,7 @@ stopwords
 
 for(i in 1:length(ptt_split_ptt_exam)){
   ar=names(ptt_split_ptt_exam)[i]
-  ptt_split_ptt_exam[ar]=list(gsub('tkb','TKB',ptt_split_ptt_exam[[i]]))
+  ptt_split_ptt_exam[ar]=list(gsub('bmw','BMW',ptt_split_ptt_exam[[i]]))
   print(i)
 }
 
