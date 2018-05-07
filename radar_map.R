@@ -21,8 +21,8 @@ suppressPackageStartupMessages({
 })
 
 #匯入字典
-neg<- readLines("MDS讀書會05-實作(5)：文字資料視覺化_字典_negative words.txt", encoding = "UTF-8")
-pos <- readLines("MDS讀書會05-實作(5)：文字資料視覺化_字典_positive words.txt", encoding = "UTF-8")
+neg<- readLines("negative words.txt", encoding = "UTF-8")
+pos <- readLines("positive words.txt", encoding = "UTF-8")
 
 #正負面評價給予權重
 weight <- rep(-1, length(neg))
