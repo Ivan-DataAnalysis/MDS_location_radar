@@ -1,5 +1,5 @@
 #匯入爬蟲爬下來的資料
-ptt_exam=rreadLines("car_crawl.txt", encoding = "UTF-8")
+ptt_exam=readLines("car_crawl.csv", encoding = "UTF-8")
 
 suppressPackageStartupMessages({
   library(httr)
