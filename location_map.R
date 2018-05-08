@@ -1,6 +1,7 @@
-#匯入爬蟲爬下來的資料
-ptt_exam=read.csv("car_crawl.csv", header=TRUE, sep=",",row.names=NULL)
+#匯入爬下來的資料
+brand_df_2=readRDS("ptt_crawl.rds")
 
+######################## library ##############################
 suppressPackageStartupMessages({
   library(httr)
   library(data.table)
@@ -11,113 +12,6 @@ suppressPackageStartupMessages({
   library(tidyverse)
   library(plotly)
 })
-
-#ptt板的名稱
-forums = "car"
-
-title.url <- list()
-ptt_exam$result= as.numeric(ifelse(ptt_exam$nrec=="",0,
-                                   ifelse(ptt_exam$nrec=="爆", 100,
-                                          ifelse(ptt_exam$nrec=="XX",-100,
-                                                 ifelse(ptt_exam$nrec=="X1",-10,
-                                                        ifelse(ptt_exam$nrec=="X2",-20,
-                                                               ifelse(ptt_exam$nrec=="X3",-30,
-                                                                      ifelse(ptt_exam$nrec=="X4",-40,
-                                                                             ifelse(ptt_exam$nrec=="X5",-50,
-                                                                                    ifelse(ptt_exam$nrec=="X6",-60,
-                                                                                           ifelse(ptt_exam$nrec=="X7",-70,
-                                                                                                  ifelse(ptt_exam$nrec=="X8",-80, ptt_exam$nrec))))))))))))
-
-
-ptt_exam$four_class= as.factor(ifelse(ptt_exam$result==100, "great",
-                                      ifelse(ptt_exam$result>0 , "good", 
-                                             ifelse(ptt_exam$result<0,"bad","soso"))))
-
-ptt_exam$two_result= as.factor(ifelse(ptt_exam$result>=summary(ptt_exam$result)[5], "great",
-                                      ifelse(ptt_exam$result< summary(ptt_exam$result)[5] , "soso","soso")))
-
-
-u=str_match(ptt_exam$title, "\\[(.*)\\]")[,2]  %>% 
-  ifelse(is.na(.)==T, "No",.) 
-u[grep(" ", u)]="emp"
-
-ptt_exam$type=u
-
-######################## 整理數據 ##############################
-name <- list()
-count <- list()
-BrandArticle <- list()
-
-name <- readLines("Brand.txt", encoding = "UTF-8")
-
-#提取關於品牌名稱的文章
-for(k in 1:length(name)){
-  count[k] <- length(grep(name[k], ptt_exam$內容, ignore.case = T))
-  BrandArticle[k] <- list(grep(name[k], ptt_exam$內容, ignore.case = T))
-  print(sprintf('progress: %s', round(k/length(name),2)))
-}
-
-brand_df <- data.table(name = name, count = as.numeric(count), ArticleID = BrandArticle)
-######################## 處理正負面的評語 ##############################
-
-#載入正負面的評語
-neg<- readLines("negative words.txt", encoding = "UTF-8")
-pos <- readLines("positive words.txt", encoding = "UTF-8")
-
-#對正負面給予權重
-weight <- rep(-1, length(neg))
-neg <- cbind(neg, weight)
-
-weight <- rep(1, length(pos))
-pos <- cbind(pos, weight)
-
-posneg <- rbind(pos, neg)
-posneg = as.data.frame(posneg)
-
-######################## 將文章分詞並取出正負面的評語 ##############################
-cutter <- worker()
-
-seg_tmp = list()
-article_pos = list()
-article_neg = list()
-article_rec=list()
-#檢查在for循環中放置什麼
-mean(c(ptt_exam[brand_df$ArticleID[[1]],8]$result), na.rm = T)
-
-a=as.numeric(ptt_exam[brand_df$ArticleID[[1]],8]$result)
-
-a= 0
-article_tmp = list()
-for (i in ptt_exam$內容) {
-  a = a+1
-  article_tmp[i] = list(i)
-}
-
-
-
-
-seg_tmp = segment(as.character(article_tmp[brand_df$ArticleID[[1]][4]]), cutter)
-article_pos = plyr::count(as.character(seg_tmp) %in% as.character(pos))[2,2]
-article_neg = plyr::count(as.character(seg_tmp) %in% as.character(neg))[2, 2]
-
-#計算這些文章中涵蓋了多少正詞和負詞
-for(l in 1:length(brand_df$ArticleID)){
-  article_rec[l]=list(mean(c(ptt_exam[brand_df$ArticleID[[l]],8]$result), na.rm = T))
-  if(length(brand_df$ArticleID[[l]] > 0)){
-    seg_tmp = segment(as.character(article_tmp[brand_df$ArticleID[[l]]]), cutter)
-    article_pos[l] = plyr::count(as.character(seg_tmp) %in% as.character(pos))[2, 2]
-    article_neg[l] = plyr::count(as.character(seg_tmp) %in% as.character(neg))[2, 2]
-  } else {
-    article_pos[l] = 0
-    article_neg[l] = 0
-  }
-  print(sprintf('progress: %s', round(l/length(brand_df$ArticleID),2)))
-}
-
-#將所有數據綁定在一起
-brand_df_2 = cbind(brand_df, unlist(article_rec),unlist(article_pos), unlist(article_neg) )
-colnames(brand_df_2) <- c("brand_name", "article_count", "article_id",'rec', "positive", "negative" ) #colname changed
-brand_df_2=na.omit(brand_df_2)
 
 
 ######################## 繪圖 ##############################
@@ -155,9 +49,10 @@ howard_theme <- function(base_size = 12, base_family = "sans"){
 }
 theme_set(howard_theme())
 attach(brand_df_2)
+
 # 正面評價較多的品牌
 ggplot(brand_df_2, aes(reorder(brand_name, -positive), positive, fill = brand_name)) + 
-   geom_bar(position = "dodge", stat="identity", width = 0.8) + 
+  geom_bar(position = "dodge", stat="identity", width = 0.8) + 
   theme(axis.text.x =  element_text(angle = 35, color="black"))+
   theme(legend.position = "none") +
   labs( x = "品牌名稱",
@@ -196,7 +91,8 @@ ggplot(brand_df_2_tmp, aes(reorder(brand_name, -article_count), value, fill = it
         y = "品牌的正評/負評數量",
         title = "品牌的正評/負評數量比較圖",
         caption = "數據來源: PTT汽車板")
- # 品牌的正評/負評數量比較百分比
+
+# 品牌的正評/負評數量比較百分比
 ggplot(brand_df_2_tmp, aes(reorder(brand_name, -article_count), value, fill = item)) +
   geom_bar(stat = "identity",position = "fill", width = 0.8)+ 
   theme(axis.text.x =  element_text(angle = 35, color="black"))+
@@ -217,8 +113,9 @@ ggplot(brand_df_2_tmp, aes(reorder(brand_name, -rec),y =  rec,fill = brand_name)
         y = "正評價分數",
         title = "正評價分數比較圖",
         caption = "數據來源: PTT汽車板")
-        
- #聲量與好感度分佈圖
+######################## 未縮放的定位圖 ##############################
+
+#聲量與好感度分佈圖
 ggplot(data=brand_df_2_tmp_2, aes(x = article_count  , y = pct, colour = brand_name)) +
   geom_point(aes(size = rec, colour =brand_name )) +
   geom_text(aes(label=brand_name), size = 3, hjust=.5, vjust=-.99) +
@@ -228,3 +125,5 @@ ggplot(data=brand_df_2_tmp_2, aes(x = article_count  , y = pct, colour = brand_n
   labs(x = "網路聲量",y = "網路好感度",
        title = "聲量與好感度分佈圖",
        caption = "數據來源: PTT汽車板")
+
+
