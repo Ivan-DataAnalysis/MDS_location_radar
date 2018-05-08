@@ -1,5 +1,6 @@
 #匯入爬蟲爬下來的資料
-ptt_exam=readLines("car_crawl.csv", encoding = "UTF-8")
+ptt_exam=read.csv("car_crawl.csv", header=TRUE, sep=",",row.names=NULL)
+
 
 ptt_exam$nrec=as.character(ptt_exam$nrec)
 ptt_exam$內容=as.character(ptt_exam$內容)
@@ -89,7 +90,7 @@ for(i in 1:length(ptt_split_ptt_exam)){
 }
 
 mm=ptt_split_ptt_exam[1]
-mm=list(gsub('說','TKB',ptt_split_ptt_exam[[1]]))
+mm=list(gsub('bmw','BMW',ptt_split_ptt_exam[[1]]))
 
 #根據上述文章詞語構建一個詞彙表
 ptt_split_ptt_exam.token <- itoken(ptt_split_ptt_exam)
