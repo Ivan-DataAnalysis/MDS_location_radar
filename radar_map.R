@@ -1,5 +1,5 @@
 #匯入爬蟲爬下來的資料
-ptt_exam=readLines("car_crawl", encoding = "UTF-8")
+ptt_exam=readLines("car_crawl.csv", encoding = "UTF-8")
 
 ptt_exam$nrec=as.character(ptt_exam$nrec)
 ptt_exam$內容=as.character(ptt_exam$內容)
@@ -79,7 +79,7 @@ ptt_split_ptt_exam <- sapply(ptt_list_ptt_exam, function(x) {
   segment(x, cutter)})
 #刪除可能毫無意義的中文無用詞
 #載入停頓詞字典
-stopwords<-readLines('/home/cheating/Downloads/ch5/stopwords.txt')
+stopwords<-readLines('stopwords.txt')
 stopwords
 
 for(i in 1:length(ptt_split_ptt_exam)){
@@ -194,7 +194,7 @@ get_analogy_two = function(add1=king,add2= woman, deduct=man,display=20) {
 
 
 #在這個領域互相競爭的品牌
-brand=read_lines('/home/cheating/Downloads/ch5/Brand.txt')
+brand=read_lines('Brand.txt')
 brand = gsub('volvo', 'Volvo',brand)
 
 
