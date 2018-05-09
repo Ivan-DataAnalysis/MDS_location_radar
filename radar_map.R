@@ -37,7 +37,7 @@ ui=shinyUI(pageWithSidebar(
   headerPanel('品牌雷達圖'),
   sidebarPanel(
     checkboxGroupInput('selectedPeople', 'select checkbox', 
-                       names(brand_label)[-1], selected="BMW")
+                       names(brand_label)[-1], selected="B")
   ),
   mainPanel(
     chartJSRadarOutput("radar", width = "450", height = "300"), width = 8
