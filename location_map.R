@@ -1,5 +1,5 @@
 #匯入爬下來的資料
-brand_df_2=readRDS("ptt_crawl.rds")
+brand_df_2=readRDS("brand_df_2.rds")
 
 ######################## library ##############################
 suppressPackageStartupMessages({
